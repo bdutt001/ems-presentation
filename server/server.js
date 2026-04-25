@@ -8,18 +8,22 @@ const app = express();
 
 app.use(cors({
     origin: [
-      "http://localhost:5173",
-      "https://YOUR_GITHUB_USERNAME.github.io"
-    ],
+    "http://localhost:5173",
+    "https://bdutt001.github.io",
+    "https://bdutt001.github.io/ems-presentation"
+  ],
 }));
 app.use(express.json());
 
 const pool = new Pool({
-  user: process.env.DB_USER,
-  password: process.env.DB_PASSWORD,
-  host: process.env.DB_HOST,
-  port: process.env.DB_PORT,
-  database: process.env.DB_NAME,
+  user: process.env.POSTGRESQL_ADDON_USER,
+  password: process.env.POSTGRESQL_ADDON_PASSWORD,
+  host: process.env.POSTGRESQL_ADDON_HOST,
+  port: process.env.POSTGRESQL_ADDON_PORT,
+  database: process.env.POSTGRESQL_ADDON_DB,
+  ssl: {
+    rejectUnauthorized: false,
+  },
 });
 
 app.get("/", (req, res) => {
@@ -79,8 +83,20 @@ app.post("/activity/update", async (req, res) => {
   }
 });
 
-app.listen(process.env.PORT, () => {
-  console.log(
-    `Server running on port ${process.env.PORT}`
-  );
+const PORT = process.env.PORT || 5000;
+
+app.listen(PORT, () => {
+  console.log(`Server running on port ${PORT}`);
+});
+
+process.on("unhandledRejection", (err) => {
+  console.error("Unhandled Rejection:", err);
+});
+
+process.on("uncaughtException", (err) => {
+  console.error("Uncaught Exception:", err);
+});
+
+app.get("/health", (req, res) => {
+  res.json({ status: "ok" });
 });

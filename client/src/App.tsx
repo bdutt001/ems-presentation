@@ -154,7 +154,7 @@ export default function App() {
   // FETCH TOTALS
   // -----------------------------
   const fetchTotals = async () => {
-    const res = await fetch("http://localhost:5000/activity/totals");
+    const res = await fetch("https://ems-presentation.onrender.com/activity/totals");
     const data = await res.json();
 
     setTotals({
@@ -174,7 +174,7 @@ export default function App() {
     clicks: number;
     idle: number;
   }) => {
-    await fetch("http://localhost:5000/activity/update", {
+    await fetch("https://ems-presentation.onrender.com/activity/update", {
       method: "POST",
       headers: { "Content-Type": "application/json" },
       body: JSON.stringify(payload),
