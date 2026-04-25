@@ -6,7 +6,12 @@ const { Pool } = require("pg");
 
 const app = express();
 
-app.use(cors());
+app.use(cors({
+    origin: [
+      "http://localhost:5173",
+      "https://YOUR_GITHUB_USERNAME.github.io"
+    ],
+}));
 app.use(express.json());
 
 const pool = new Pool({
