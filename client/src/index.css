@@ -112,6 +112,7 @@ ul {
 ========================= */
 
 .header {
+  position: sticky;
   display: flex;
   justify-content: space-between;
   align-items: center;
@@ -150,6 +151,13 @@ ul {
   transform: translateY(-.2rem);
 }
 
+.layout {
+  display: flex;
+  align-items: flex-start;
+  gap: 3rem;
+  padding: 3rem;
+}
+
 /* =========================
    SLIDES
 ========================= */
@@ -157,7 +165,8 @@ ul {
 .about {
   display: flex;
   flex-direction: column;
-  padding: 3rem;
+  flex: 1;
+  min-width: 0;
   text-align: left;
   gap: 2rem;
 }
@@ -201,11 +210,10 @@ ul {
 ========================= */
 
 .hud {
-  position: fixed;
-  left: 50%;
-  transform: translateX(-50%);
-  bottom: 3rem;
-  padding: 2rem;
+  position: sticky;
+  top: 2rem;
+
+  padding: 3rem;
   border: .2rem solid var(--border);
   border-radius: 1rem;
 
@@ -216,34 +224,40 @@ ul {
   text-align: left;
   font-size: 1rem;
 
-  max-width: 25vw;
+  width: 25vw;
+  max-width: 350px;
 
-  z-index: 999;
+  z-index: 1;
 }
 
 /* =========================
    WARNING
 ========================= */
 
-.warning {
-  position: fixed;
-  right: 0rem;
-  transform: translateX(-50%);
-  bottom: 3rem;
 
+.warning,
+.active-indicator {
+  margin-top: 1rem;
   padding: 1rem;
-  border: .2rem solid #c53030;
   border-radius: 1rem;
-
-  background: rgba(197, 48, 48, 0.5);
-  backdrop-filter: blur(16px);
-
-  color: var(--text-h);
   font-weight: 600;
+  text-align: center;
 
+  backdrop-filter: blur(16px);
   box-shadow: var(--shadow);
+}
+
+.warning {
+  border: .2rem solid #c53030;
+  background: rgba(197, 48, 48, 0.2);
+  color: var(--text-h);
   animation: pulse 1.5s infinite;
-  z-index: 10000;
+}
+
+.active-indicator {
+  border: .2rem solid #2f855a;
+  background: rgba(47, 133, 90, 0.2);
+  color: var(--text-h);
 }
 
 @keyframes pulse {
@@ -280,7 +294,12 @@ button {
   justify-content: space-between;
   gap: 2rem;
   padding: 0 0;
+ }
 
+ .column {
+  display: flex;
+  flex-direction: column;
+  gap: 1.25rem;
  }
 
  .disclaimer {
@@ -289,3 +308,15 @@ button {
   transform: translateX(-50%);
   bottom: 2rem;
  }
+
+ @media (max-width: 900px) {
+  .layout {
+    flex-direction: column;
+  }
+
+  .hud {
+    width: 100%;
+    max-width: none;
+    position: static;
+  }
+}

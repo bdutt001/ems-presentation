@@ -7,14 +7,14 @@ type SlideKey =
   | "why"
   | "problem"
   | "employee"
-  | "behavior"
   | "conclusion";
 
 export default function App() {
   const [slide, setSlide] = useState<SlideKey>("intro");
 
-  // --- monitoring state (your meta layer) ---
   const [clicks, setClicks] = useState(0);
+  const [lastClicks, setLastClicks] = useState(0);
+  const [lastIdle, setLastIdle] = useState(0);
   const [lastMove, setLastMove] = useState(Date.now());
   const [idle, setIdle] = useState(0);
 
@@ -125,6 +125,53 @@ export default function App() {
     { key: "conclusion", label: "Conclusion" },
   ];
 
+  const syncToServer = async () => {
+    const deltaClicks = clicks - lastClicks;
+    const deltaIdle = idle - lastIdle;
+
+    if (deltaClicks === 0 && deltaIdle === 0) return;
+
+    await fetch("http://localhost:5000/activity/update", {
+      method: "POST",
+      headers: {
+        "Content-Type": "application/json",
+      },
+      body: JSON.stringify({
+        clicks: deltaClicks,
+        idle: deltaIdle,
+      }),
+    });
+
+    setLastClicks(clicks);
+    setLastIdle(idle);
+  };
+
+  useEffect(() => {
+  const interval = setInterval(() => {
+      syncToServer();
+    }, 5000);
+
+    return () => clearInterval(interval);
+  }, [clicks, idle]);
+
+  const [totals, setTotals] = useState({
+    total_clicks: 0,
+    total_idle_time: 0,
+  });
+
+  const fetchTotals = async () => {
+    const res = await fetch("http://localhost:5000/activity/totals");
+    const data = await res.json();
+    setTotals(data);
+  };
+
+  useEffect(() => {
+    fetchTotals();
+
+    const interval = setInterval(fetchTotals, 5000);
+    return () => clearInterval(interval);
+  }, []);
+
   // keyboard navigation
   useEffect(() => {
     const handler = (e: KeyboardEvent) => {
@@ -166,34 +213,61 @@ export default function App() {
         </nav>
       </header>
 
+      
+
       {/* SLIDE CONTENT */}
       
 
       
-      <main className="about">
-        <div key={slide} className="timeline-item slide">
-          {slides[slide]}
-        </div>
-        {idle > 5 && (
-        <div className="warning">
-          ⚠ Inactivity detected
-        </div>
-        )}
-        <div className="hud">
-          <h2>Activity</h2>
-          <div className="row-apart">
-            <p>Clicks:</p><p>{clicks}</p>
+      <div className="layout">
+        <main className="about">
+          <div key={slide} className="timeline-item slide">
+            {slides[slide]}
           </div>
-          <div className="row-apart">
-            <p>Idle Time:</p><p>{idle}s</p>
+          
+        
+        </main>
+        <aside>
+          <div className="hud">
+            <div className="column">
+              <div>
+                <h2>Your Activity</h2>
+                <div className="row-apart">
+                  <p>Clicks:</p><p>{clicks}</p>
+                </div>
+                <div className="row-apart">
+                  <p>Idle Time:</p><p>{idle}s</p>
+                </div>
+                <div className="row-apart">
+                  <p>Productivity Score:</p><p>{Math.max(0, 100 - idle + clicks)}</p>
+                </div>
+              </div>
+              <div>
+                <h2>Totals</h2>
+                <div className="row-apart">
+                  <p>Total Clicks:</p>
+                  <p>{totals.total_clicks}</p>
+                </div>
+                <div className="row-apart">
+                  <p>Total Idle:</p>
+                  <p>{totals.total_idle_time}s</p>
+                </div>
+              </div>
+            </div>
+            <h3>Disclaimer</h3>
+            <p>All metrics are shown for demonstration purposes. This site does not collect user data.</p>
           </div>
-          <div className="row-apart">
-            <p>Productivity Score:</p><p>{Math.max(0, 100 - idle + clicks)}</p>
-          </div>
-          <h3>Disclaimer</h3>
-          <p>All metrics are shown for demonstration purposes. This site does not collect user data.</p>
-        </div>
-      </main>
+          {idle > 5 ? (
+            <div className="warning">
+              ⚠ Idle
+            </div>
+          ) : (
+            <div className="active-indicator">
+              ● Active
+            </div>
+          )}
+        </aside>
+      </div>
     </div>
   );
 }
