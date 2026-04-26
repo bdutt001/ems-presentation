@@ -1,0 +1,16 @@
+.timeline-svg {
+  width: 450px;
+  color: var(--text-h);
+}
+
+.node rect {
+  fill: var(--glass);
+  stroke: var(--border);
+  stroke-width: 2;
+}
+
+.node text {
+  fill: var(--text-h);
+  font-size: 14px;
+  font-weight: 600;
+}

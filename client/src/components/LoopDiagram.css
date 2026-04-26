@@ -1,0 +1,33 @@
+
+
+.diagram {
+  display: flex;
+  justify-content: center;
+  padding: 1rem;
+}
+
+.loop-svg {
+  width: 360px;
+  height: 360px;
+
+  /* THIS fixes your color issue */
+  color: var(--border);
+}
+
+/* node styling */
+.node-group circle {
+  fill: var(--glass);
+  stroke: var(--border);
+  stroke-width: 2;
+;
+ 
+}
+
+/* SVG text styling */
+.node-group text {
+  fill: white;
+  font-size: .75rem;
+  font-weight: 600;
+  text-anchor: middle;
+  dominant-baseline: middle;
+}
