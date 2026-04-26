@@ -10,6 +10,7 @@ type SlideKey =
   | "conclusion";
 
 export default function App() {
+  const syncLock = useRef(false);
   const [slide, setSlide] = useState<SlideKey>("intro");
 
   // -----------------------------
@@ -143,7 +144,7 @@ export default function App() {
   // LIVE TOTALS
   // -----------------------------
   const liveClicks =
-    totals.total_clicks + pendingClicksRef.current + actions;
+    totals.total_clicks + pendingClicksRef.current;
 
   const liveIdle =
     totals.total_idle_time +
@@ -153,6 +154,10 @@ export default function App() {
   // -----------------------------
   // FETCH TOTALS
   // -----------------------------
+
+  const lastSyncedIdleRef = useRef(0);
+  const lastSyncedClicksRef = useRef(0);
+
   const fetchTotals = async () => {
     const res = await fetch("https://ems-presentation.onrender.com/activity/totals");
     const data = await res.json();
@@ -181,8 +186,11 @@ export default function App() {
     });
   };
 
+
   useEffect(() => {
     const interval = setInterval(async () => {
+      if (syncLock.current) return;
+
       if (
         pendingClicksRef.current === 0 &&
         pendingIdleRef.current === 0
@@ -191,15 +199,22 @@ export default function App() {
         return;
       }
 
+      syncLock.current = true;
+
       await updateServer({
         clicks: pendingClicksRef.current,
-        idle: pendingIdleRef.current,
+        idle: sessionIdleRef.current - lastSyncedIdleRef.current,
       });
+
+      lastSyncedIdleRef.current = sessionIdleRef.current;
+      lastSyncedClicksRef.current += pendingClicksRef.current;
 
       pendingClicksRef.current = 0;
       pendingIdleRef.current = 0;
 
       await fetchTotals();
+
+      syncLock.current = false;
     }, 10000);
 
     return () => clearInterval(interval);

@@ -6,12 +6,24 @@ const { Pool } = require("pg");
 
 const app = express();
 
+const allowedOrigins = [
+  "http://localhost:5173",
+  "https://bdutt001.github.io",
+  "https://bdutt001.github.io/ems-presentation",
+];
+
 app.use(cors({
-    origin: [
-    "http://localhost:5173",
-    "https://bdutt001.github.io",
-    "https://bdutt001.github.io/ems-presentation"
-  ],
+  origin: function (origin, callback) {
+    // allow server-to-server or curl (no origin)
+    if (!origin) return callback(null, true);
+
+    if (allowedOrigins.includes(origin)) {
+      return callback(null, true);
+    }
+
+    return callback(new Error("Not allowed by CORS: " + origin));
+  },
+  credentials: true,
 }));
 app.use(express.json());
 
